@@ -8,7 +8,7 @@ const int irqPin = 2;         // change for your board; must be a hardware inter
 String incoming;              // outgoing message
 byte localAddress = 0xCC;     // address of this device
 int interval = 2000;
-int proverka = 1;
+int proverka = 0;
 byte sender;
 byte recipient;
 
@@ -103,6 +103,7 @@ void priem(int packetSize) {
     }
     Serial.println(sender_name + ": MsgID = " + ID + " RSSI = " + packetRSSI + " SNR = " + snr + " : " + "(" + incoming + ")");
     delay(100);
+    proverka=1;
     sent(true);
   }
 }
@@ -113,6 +114,7 @@ void proverka() {
     return;
   }
   Serial.println(sender_name + ": RSSI = " + packetRSSI + " SNR = " + snr + " proverkaID: " + ID + " доставлено");
+  proverka=0;
 }
 
 void sent(boolean isproverka) {
