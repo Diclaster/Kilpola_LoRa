@@ -12,8 +12,8 @@ String Text;
 String incoming;
 byte proverka = 1;
 byte ID = 0;
-byte senderme = 0xCC;
-byte recipientme = 0xDD;
+byte senderme = 0xAA;
+byte recipientme = 0xBB;
 String sender_name = "";
 byte sender;
 byte recipient;
@@ -21,19 +21,19 @@ byte recipient;
 String get_name(sender) {
   switch (sender) {
     case 0xAA:
-      sender_name = "Медведь";
-      break;
-    case 0xBB:
-      sender_name = "Краб";
-      break;
-    case 0xCC:
       sender_name = "Камчатка";
       break;
-    case 0xDD:
-      sender_name = "Ретранслятор";
+    case 0xBB:
+      sender_name = "Base";
+      break;
+    case 0xCC:
+      sender_name = "Ретранслятор1";
       break;
     case 0xEE:
-      sender_name = "Base";
+      sender_name = "Ретранслятор2";
+      break;
+    case 0xDD:
+      sender_name = "Ретранслятор3";
       break;
     default:
       sender_name = "Некто";
@@ -105,6 +105,10 @@ void priem(int packetSize) {
     while (LoRa.available()) {
       incoming += (char)LoRa.read();
     }
+    if (incomingLength != incoming.length()) {
+      Serial.println("error: message length does not match length");
+      return;
+    }
     Serial.println(sender_name + ": MsgID = " + ID + " RSSI = " + packetRSSI + " SNR = " + snr + " : " + "(" + incoming + ")");
     sent(true);
   }
@@ -120,16 +124,18 @@ void proverka() {
 }
 
 void sent(boolean isproverka) {
+  recepient = sender;
   LoRa.beginPacket();
-  LoRa.write(destination);
-  LoRa.write(localAddress);
-  LoRa.write(msgCount);
+  LoRa.write(recepient);
+  LoRa.write(senderme);
+  LoRa.write(ID);
 
   if (isproverka == true) {
     LoRa.write(1);
     LoRa.endPacket();
   }
   else {
+    LoRa.write(0);
     LoRa.write(Text.length());
     LoRa.print(Text);
     LoRa.endPacket;
