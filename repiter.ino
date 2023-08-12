@@ -10,9 +10,18 @@ byte localAddress = 0xCC;     // address of this device
 int interval = 2000;
 int proverka = 0;
 byte sender;
-byte recipient;
+byte recepient;
+String sender_name;
+int lastSendTime;
+String Text;
+byte ID;
+byte incomingLength;
+byte msgCount;
+byte packetRSSI;
+byte snr;
+int Hopes;
 
-String get_name(sender) {
+String get_name(byte sender) {
   switch (sender) {
     case 0xAA:
       sender_name = "Камчатка";
@@ -74,7 +83,7 @@ void loop() {
       Text = incoming;
       sent(false);
       Serial.println("от " + get_name(sender) + " ретранслировано сообщение с ID= " + ID + " :" + incoming);
-      lastSendTime = millis()
+      lastSendTime = millis();
     }
   }
 }
@@ -82,18 +91,20 @@ void priem(int packetSize) {
   if (packetSize == 0) return;
 
   boolean soobsh = LoRa.read();
-  recipient = LoRa.read();
+  recepient = LoRa.read();
   sender = LoRa.read();
   ID = LoRa.read();
   sender_name = get_name(sender);
   int packetRSSI = LoRa.packetRssi();
   float snr = LoRa.packetSnr();
 
+  sender_name=get_name(sender); 
   if (soobsh == false) {
     proverka = LoRa.read();
-    proverka();
+    proverka1();
   }
   else {
+    Hopes = LoRa.read();
     while (LoRa.available()) {
       incoming += (char)LoRa.read();
     }
@@ -108,7 +119,7 @@ void priem(int packetSize) {
   }
 }
 
-void proverka() {
+void proverka1() {
   if (ID != msgCount) {
     Serial.println("staroe");
     return;
@@ -121,7 +132,7 @@ void sent(boolean isproverka) {
   recepient = sender;
   LoRa.beginPacket();
   LoRa.write(recepient);
-  LoRa.write(senderme);
+  LoRa.write(localAddress);
   LoRa.write(ID);
 
   if (isproverka == true) {
@@ -131,7 +142,7 @@ void sent(boolean isproverka) {
   else {
     LoRa.write(Text.length());
     LoRa.print(Text);
-    LoRa.write(Hopes++)
-    LoRa.endPacket;
+    LoRa.write(Hopes++);
+    LoRa.endPacket();
   }
 }
